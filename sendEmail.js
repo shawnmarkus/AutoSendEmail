@@ -13,9 +13,7 @@ authorize()
 
     async function checkForNewEmails() {
       // Get the list of unread messages in the user's inbox
-      //   let newEmailDetail = {};
       let newEmailDetail = new Set();
-      console.log("$$$$$$$$$$$$$$$$$$$$$$$");
       const response = await gmail.users.messages.list({
         userId: "me",
         // q: "label:INBOX",
@@ -23,7 +21,6 @@ authorize()
       });
 
       // Process each unread message
-      //   let count = 1; //just for check
 
       if (response.data.resultSizeEstimate) {
         for (let message of response.data.messages) {
@@ -33,8 +30,6 @@ authorize()
             userId: "me",
             id: message.id,
           });
-
-          // console.log(messageData.data.payload.headers);
 
           const headers = messageData.data.payload.headers;
 
@@ -52,23 +47,6 @@ authorize()
           const fromEmail = from[2];
 
           newEmailDetail.add(fromEmail);
-
-          // -----------------------------------when line 16 :   let newEmailDetail = {} will exist;
-          //   if (newEmailDetail[fromEmail]) {
-          //     newEmailDetail[fromEmail].push(message.threadId);
-          //   } else {
-          //     newEmailDetail[fromEmail] = [message.threadId];
-          //   }
-
-          //   -------------------------------------------end here ------------------------------------
-
-          //   console.log(
-          //     count,
-          //     "---------------------------\n",
-          //     newEmailDetail,
-          //     "\n"
-          //   );
-          //   count++;
         }
       }
       return newEmailDetail;
