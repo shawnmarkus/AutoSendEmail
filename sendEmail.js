@@ -7,7 +7,7 @@ let auth;
 authorize()
   .then((Authdata) => {
     auth = Authdata;
-    listLabels(auth);
+    // listLabels(auth);
 
     const gmail = google.gmail({ version: "v1", auth });
 
@@ -24,14 +24,17 @@ authorize()
 
       if (response.data.resultSizeEstimate) {
         for (let message of response.data.messages) {
-          // console.log("the read msg ===> ", message);
+          console.log("the read msg ===> ", message);
 
           const messageData = await gmail.users.messages.get({
             userId: "me",
             id: message.id,
           });
 
+          // console.log(messageData);
+
           const headers = messageData.data.payload.headers;
+          // console.log("headers = ", JSON.stringify(headers));
 
           let fromHeader = "";
           for (let i = 0; i < headers.length; i++) {
@@ -43,6 +46,7 @@ authorize()
 
           // Extract email address and name from the From header
           const from = fromHeader.match(/([^<]*)<([^>]*)>/);
+          // console.log(from);
           const fromName = from[1].trim();
           const fromEmail = from[2];
 
@@ -56,7 +60,7 @@ authorize()
       for (let emailId of dataSet) {
         getAllMailsByEmailId(emailId).then((threadData) => {
           if (threadData) {
-            console.log(threadData);
+            console.log("threadData==>", threadData);
           } else {
             console.log("Noting retured");
           }
@@ -67,6 +71,8 @@ authorize()
     // get all mails from a specified email
     async function getAllMailsByEmailId(fromEmail) {
       // getting all the email based on emailId
+
+      console.log("from getallmailsbyEmail ", fromEmail);
       const response = await gmail.users.messages.list({
         userId: "me",
         // q: "label:INBOX",
@@ -77,6 +83,8 @@ authorize()
       for (let messageMetaData of response.data.messages) {
         threadIdCollectionForMailId.push(messageMetaData.threadId);
       }
+
+      console.log("threadIdCollection ", threadIdCollectionForMailId);
 
       const isRepliedArrayOfEmail = "";
       const promises = [];
