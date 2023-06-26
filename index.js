@@ -1,3 +1,17 @@
+/*
+--> so far that has been acheived 
+    * 
+    * we are getting the unread email list.
+    * we can extract the email id of the sender.
+    * we can reply to it.
+    * 
+--> what more to acheive 
+    *
+    * we have to check whether the particular email has already been replied or not.
+    * for that we can use the threadid to get info related to no reply
+    * 
+*/
+
 var { authorize, listLabels } = require("./authorize");
 const { google } = require("googleapis");
 // the auth will contain the verified credentials
@@ -68,71 +82,89 @@ authorize()
 
           // console.log(fromEmail);
 
-          // emailing
-          const message =
-            "From: testautomailingapp@gmail.com\r\n" +
-            `To: ${fromEmail}\r\n` +
-            "Subject: check out bro\r\n\r\n" +
-            "Auto Genereated reply, so please don't reply .";
+          let isRepliedEarlier = await getInfoOfThreadId(data.threadId);
+          if (isRepliedEarlier > 1) {
+            console.log(
+              "this has been already replied by this no. of times==>",
+              isRepliedEarlier
+            );
+          } else {
+            console.log("generating the email");
+            // emailing
+            const message =
+              "From: testautomailingapp@gmail.com\r\n" +
+              `To: ${fromEmail}\r\n` +
+              "Subject: check out bro\r\n\r\n" +
+              "Auto Genereated reply, so please don't reply .";
 
-          const raw = Buffer.from(message)
-            .toString("base64")
-            .replace(/\+/g, "-")
-            .replace(/\//g, "_")
-            .replace(/=+$/, "");
+            const raw = Buffer.from(message)
+              .toString("base64")
+              .replace(/\+/g, "-")
+              .replace(/\//g, "_")
+              .replace(/=+$/, "");
 
-          const sentResponse = await gmail.users.messages.send({
-            userId: "testautomailingapp@gmail.com",
-            requestBody: {
-              raw: raw,
-              labelIds: TestLabel[0].id,
-              id: data.id,
-              threadId: data.threadId,
-              snippet: "This is a test email message",
-              payload: {
-                mimeType: "text/plain",
-                headers: [
-                  {
-                    name: "From",
-                    value: "testautomailingapp@gmail.com",
-                  },
-                  {
-                    name: "To",
-                    value: fromEmail,
-                  },
-                  {
-                    name: "Subject",
-                    value: "Test email message",
-                  },
-                  {
-                    name: "In-Reply-To",
-                    value: fromEmail,
-                  },
-                  {
-                    name: "Date",
-                    value: Date.now(),
-                  },
-                ],
-              },
-            },
-          });
-
-          if (sentResponse) {
-            console.log("Replied Successfully");
-            const res = gmail.users.messages.modify({
-              userId: "me",
-              id: data.id,
+            const sentResponse = await gmail.users.messages.send({
+              userId: "testautomailingapp@gmail.com",
               requestBody: {
-                addLabelIds: [TestLabel[0].id],
+                raw: raw,
+                labelIds: TestLabel[0].id,
+                id: data.id,
+                threadId: data.threadId,
+                snippet: "This is a test email message",
+                payload: {
+                  mimeType: "text/plain",
+                  headers: [
+                    {
+                      name: "From",
+                      value: "testautomailingapp@gmail.com",
+                    },
+                    {
+                      name: "To",
+                      value: fromEmail,
+                    },
+                    {
+                      name: "Subject",
+                      value: "Test email message",
+                    },
+                    {
+                      name: "In-Reply-To",
+                      value: fromEmail,
+                    },
+                    {
+                      name: "Date",
+                      value: Date.now(),
+                    },
+                  ],
+                },
               },
             });
-          } else {
-            console.log("failed to reply");
+
+            if (sentResponse) {
+              const res = gmail.users.messages.modify({
+                userId: "me",
+                id: data.id,
+                requestBody: {
+                  addLabelIds: [TestLabel[0].id],
+                },
+              });
+            }
           }
         }
       } else {
         console.log("no unread email");
       }
     });
+
+    // get details regarding the threadId
+    async function getInfoOfThreadId(threadId) {
+      const thread = await gmail.users.threads.get({
+        userId: "me",
+        id: threadId,
+        format: "metadata",
+        metadataHeaders: ["From", "To", "Subject", "Date", "Cc"],
+      });
+
+      return thread.data.messages.length;
+    }
   })
   .catch((err) => console.log(err));
