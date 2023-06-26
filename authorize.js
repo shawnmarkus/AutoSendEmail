@@ -83,10 +83,10 @@ async function listLabels(auth) {
     console.log("No labels found.");
     return;
   }
-  console.log("Labels:");
-  labels.forEach((label) => {
-    console.log(`- ${JSON.stringify(label)}`);
-  });
+  // console.log("Labels:");
+  // labels.forEach((label) => {
+  //   console.log(`- ${JSON.stringify(label)}`);
+  // });
   return labels;
 }
 
