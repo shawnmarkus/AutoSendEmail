@@ -1,17 +1,3 @@
-/*
---> so far that has been acheived 
-    * 
-    * we are getting the unread email list.
-    * we can extract the email id of the sender.
-    * we can reply to it.
-    * 
---> what more to acheive 
-    *
-    * we have to check whether the particular email has already been replied or not.
-    * for that we can use the threadid to get info related to no reply
-    * 
-*/
-
 var { authorize, listLabels } = require("./authorize");
 const { google } = require("googleapis");
 // the auth will contain the verified credentials
