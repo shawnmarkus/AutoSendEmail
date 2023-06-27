@@ -1,5 +1,6 @@
 var { authorize, listLabels } = require("./authorize");
 const { google } = require("googleapis");
+
 // the auth will contain the verified credentials
 let auth;
 
